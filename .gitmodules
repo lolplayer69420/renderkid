@@ -1,0 +1,6 @@
+[submodule "src/raylib"]
+	path = inc/raylib
+	url = https://github.com/raysan5/raylib.git
+[submodule "src/glm"]
+	path = inc/glm_src
+	url = https://github.com/g-truc/glm.git
