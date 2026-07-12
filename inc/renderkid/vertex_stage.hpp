@@ -9,6 +9,7 @@
 #include <glm/vec4.hpp>
 #include <cstdint>
 #include <vector>
+#include <utility>
 #include <iostream>
 #include <tuple>
 
@@ -19,7 +20,9 @@
 #define LINE_PRIMITIVE 2
 #define TRIANGLE_PRIMITIVE 3
 
-namespace _vertex {
+namespace _vertex { 
+typedef std::pair<glm::vec4, glm::vec4> Vertex;
+
 typedef std::tuple<
   std::vector<glm::vec4>,
   std::vector<glm::vec4>
@@ -45,8 +48,8 @@ struct Primitive {
 
 class VertexStage {
   public:
-    VertexStage(int x, int y, int width, int height, float clip_near, float clip_far) :
-      width{width}, height{height}, clip_near{clip_near}, clip_far{clip_far} {};
+    VertexStage(int x, int y, int width, int height) :
+      width{width}, height{height} {};
     
     void set_proj_matrix(const glm::mat4 &matrix) {
       proj_matrix = matrix;
@@ -67,7 +70,6 @@ class VertexStage {
     };
 
   private:
-    // TODO: Arreglar esto
     void do_vertex_transformations(glm::vec4 &vertex) {
       // Apply tranformations to a vertex and perform the perspective division on it
       vertex = proj_matrix * view_matrix * model_matrix * vertex;
@@ -76,14 +78,13 @@ class VertexStage {
       vertex.y = (1.0f - (vertex.y * 0.5f + 0.5f)) * height;
     }
 
+    void clip_triangle(const Vertex triangle[3], const glm::vec4 &equation);
     std::vector<Primitive> primitive_list;
     glm::mat4 proj_matrix;
     glm::mat4 view_matrix;
     glm::mat4 model_matrix;
     int width;
     int height;
-    float clip_near;
-    float clip_far;
 };
 }
 
