@@ -45,9 +45,23 @@ void render::set_view_matrix(const glm::mat4 &matrix) {
 }
 
 
-void render::set_projection_matrix(const glm::mat4 &matrix) {
+void render::set_ortho_projection(float left, float right, float bottom, float top, float near, float far) {
+  glm::mat4 matrix = glm::ortho(left, right, bottom, top, near, far);
+  vertex_stage->set_proj_matrix(matrix);
+} 
+
+
+void render::set_ortho_projection(float left, float right, float top, float bottom) {
+  glm::mat4 matrix = glm::ortho(left, right, top, bottom);
   vertex_stage->set_proj_matrix(matrix);
 }
+
+
+void render::set_perspective_projection(float fovy, float aspect, float near, float far) {
+  glm::mat4 matrix = glm::perspective(fovy, aspect, near, far);
+  vertex_stage->set_proj_matrix(matrix);
+} 
+
 
 
 void render::read_vertex_data(float *data, size_t size) {
@@ -82,8 +96,8 @@ void render::init_window(int width, int height) {
 }
 
 
-void render::set_viewport(int x, int y, int width, int height, int clip_near, int clip_far) {
-  vertex_stage.emplace(x, y, width, height, clip_near, clip_far);
+void render::set_viewport(int x, int y, int width, int height) {
+  vertex_stage.emplace(x, y, width, height);
   rasterizer.emplace(width, height);
 }
 

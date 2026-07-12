@@ -79,7 +79,15 @@ void _raster::Rasterizer::raster_triangle(const _vertex::Primitive &triangle) {
   const float ymax = glm::fmax(a.y, b.y, c.y);
 
   for (float y = ymin; y <= ymax; ++y) {
+    if (y < 0 || y > height) {
+      continue;
+    }
+
     for (float x = xmin; x <= xmax; ++x) {
+      if (x < 0 || x > width) {
+        continue;
+      }
+
       glm::vec4 pixel = glm::vec4(x, y, 0.0f, 0.0f);
 
       float area = determinant(a, b, c);
