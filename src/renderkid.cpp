@@ -12,26 +12,36 @@
 #include <raylib.h>
 #include <optional>
 
-
-struct VertexAttribData {
-  size_t stride;
-  size_t offset;
-};
-
-
 std::optional<_vertex::VertexStage> vertex_stage;
 std::optional<_raster::Rasterizer> rasterizer;
 
-std::map<uint8_t, VertexAttribData> vertex_attribs;
+std::vector<_vertex::VertexAttribData> vertex_attribs;
+
+size_t vertex_size = 0;
 
 
-void render::add_vertex_attribute(uint8_t type, size_t stride, size_t offset) {
-  VertexAttribData attrib_data = {
-    stride,
-    offset
+void render::add_vertex_attribute(uint8_t type, size_t position) {
+  _vertex::VertexAttribData attrib_data = {
+    position,
+    type
   };
 
-  vertex_attribs.insert({type, attrib_data});
+  switch (type) {
+    case VERTEX_ATTRIBUTE:
+      vertex_size += 3;
+      break;
+    case COLOR_RGBA_ATTRIBUTE:
+      vertex_size += 4;
+      break;
+    case COLOR_RGB_ATTRIBUTE:
+      vertex_size += 3;
+      break;
+    case TEXTURE_COORD_ATTRIBUTE:
+      vertex_size += 2;
+      break;
+  }
+
+  vertex_attribs.push_back(attrib_data);
 }
 
 
@@ -69,25 +79,30 @@ void render::read_vertex_data(float *data, size_t size) {
     throw std::runtime_error("No vertex attributes were set!");
   }
 
-  for (const auto &attrib : vertex_attribs) {
-    VertexAttribData attrib_data = attrib.second;
-    size_t attrib_size;
-
-    for (size_t i = attrib_data.offset; i < size; i += attrib_data.stride) {
-      switch (attrib.first) {
-        case VERTEX_ATTRIBUTE:
-          std::get<VERTEX_ATTRIBUTE>(_vertex::vertex_data).emplace_back(
-            data[i], data[i + 1], data[i + 2], 1.0
-          );
-          break;
-        case COLOR_ATTRIBUTE:
-          std::get<COLOR_ATTRIBUTE>(_vertex::vertex_data).emplace_back(
-            data[i], data[i + 1],  data[i + 2], data[i + 3]
-          );
-          break;
-      }
-    }
+  for (size_t i = 0; i < size; i += vertex_size) {
+    _vertex::Vertex new_vertex = _vertex::Vertex(&data[i], vertex_attribs);
+    _vertex::vertex_data.push_back(new_vertex);
   }
+}
+
+
+uint8_t render::create_texture(int width, int height, int n_channels) {
+  return rasterizer->create_texture(width, height, n_channels);
+}
+
+
+void render::use_texture(uint8_t id) {
+  rasterizer->use_texture(id);
+}
+
+
+void render::load_data_to_texture(uint8_t *data) {
+  rasterizer->load_data_to_texture(data);
+}
+
+
+void render::destroy_texture(uint8_t id) {
+  rasterizer->destroy_texture(id);
 }
 
 
