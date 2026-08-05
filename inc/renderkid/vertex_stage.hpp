@@ -19,6 +19,7 @@
 #define COLOR_RGBA_ATTRIBUTE 1
 #define COLOR_RGB_ATTRIBUTE 2
 #define TEXTURE_COORD_ATTRIBUTE 3
+#define NORM_VECTOR_ATTRIBUTE 4
 
 #define POINT_PRIMITIVE 0
 #define LINE_PRIMITIVE 1
@@ -67,6 +68,11 @@ struct Vertex {
           attribs[j++] = attribute;
 
           break;
+        case NORM_VECTOR_ATTRIBUTE:
+          attribute.data = glm::vec4(data[position], data[position + 1], data[position + 2], 1.0f);
+          attribs[j++] = attribute;
+
+          break;
       }
     }
   }
@@ -74,6 +80,9 @@ struct Vertex {
   Vertex() {}
 
   glm::vec4 coords;
+
+  // For shading purposes
+  glm::vec4 world_coords;
   std::array<VertexAttrib, MAX_ATTRIBS> attribs;
 };
 
@@ -111,8 +120,9 @@ class VertexStage {
     };
 
   private:
-    void do_object_to_clip_space_transform(glm::vec4 &vertex) {
-      vertex = proj_matrix * view_matrix * model_matrix * vertex;
+    void do_object_to_clip_space_transform(_vertex::Vertex &vertex) {
+      vertex.world_coords = model_matrix * vertex.coords;
+      vertex.coords = proj_matrix * view_matrix * model_matrix * vertex.coords;
     }
 
     void do_clip_to_viewport_transform(_vertex::Vertex &vertex) {

@@ -8,6 +8,7 @@
 #define COLOR_RGBA_ATTRIBUTE 1
 #define COLOR_RGB_ATTRIBUTE 2
 #define TEXTURE_COORD_ATTRIBUTE 3
+#define NORM_VECTOR_ATTRIBUTE 4
 
 #define POINTS 0
 #define LINES 1
@@ -27,6 +28,14 @@ uint8_t create_texture(int width, int height, int n_channels);
 void load_data_to_texture(uint8_t *data);
 void destroy_texture(uint8_t id);
 void use_texture(uint8_t id);
+
+uint8_t create_light(const glm::vec3 &initial_pos, const glm::vec3 &initial_color);
+void destroy_light(uint8_t id);
+void set_light_position(uint8_t id, const glm::vec3 &pos);
+void set_light_color(uint8_t id, const glm::vec3 &color);
+void set_view_position(const glm::vec3 &position);
+void set_ambient_strength(float strength);
+void set_specular_strength(float strength);
 
 void set_viewport(int x, int y, int width, int height);
 void draw_unindexed(uint8_t primitive_type);

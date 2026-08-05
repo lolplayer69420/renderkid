@@ -39,6 +39,9 @@ void render::add_vertex_attribute(uint8_t type, size_t position) {
     case TEXTURE_COORD_ATTRIBUTE:
       vertex_size += 2;
       break;
+    case NORM_VECTOR_ATTRIBUTE:
+      vertex_size += 3;
+      break;
   }
 
   vertex_attribs.push_back(attrib_data);
@@ -103,6 +106,41 @@ void render::load_data_to_texture(uint8_t *data) {
 
 void render::destroy_texture(uint8_t id) {
   rasterizer->destroy_texture(id);
+}
+
+
+uint8_t render::create_light(const glm::vec3 &initial_pos, const glm::vec3 &initial_color) {
+  return rasterizer->create_light(initial_pos, initial_color);
+}
+
+
+void render::destroy_light(uint8_t id) {
+  rasterizer->destroy_light(id);
+}
+
+
+void render::set_light_position(uint8_t id, const glm::vec3 &position) {
+  rasterizer->set_light_position(id, position);
+}
+
+
+void render::set_light_color(uint8_t id, const glm::vec3 &color) {
+  rasterizer->set_light_color(id, color);
+}
+
+
+void render::set_ambient_strength(float strength) {
+  rasterizer->set_ambient_strength(strength);
+}
+
+
+void render::set_specular_strength(float strength) {
+  rasterizer->set_specular_strength(strength);
+}
+
+
+void render::set_view_position(const glm::vec3 &position) {
+  rasterizer->set_view_position(position);
 }
 
 

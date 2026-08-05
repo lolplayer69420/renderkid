@@ -44,9 +44,9 @@ void _vertex::VertexStage::process_vertex_data(uint8_t primitive_type,
 
         break;
       case TRIANGLE_PRIMITIVE:
-        do_object_to_clip_space_transform(vertex_a.coords);
-        do_object_to_clip_space_transform(vertex_b.coords);
-        do_object_to_clip_space_transform(vertex_c.coords);
+        do_object_to_clip_space_transform(vertex_a);
+        do_object_to_clip_space_transform(vertex_b);
+        do_object_to_clip_space_transform(vertex_c);
         do_clip_to_viewport_transform(vertex_a);
         do_clip_to_viewport_transform(vertex_b);
         do_clip_to_viewport_transform(vertex_c);

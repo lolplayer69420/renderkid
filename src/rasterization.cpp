@@ -27,6 +27,7 @@ _raster::Rasterizer::Rasterizer(int width, int height) {
   this->width = width;
   this->height = height;
   textures = std::map<uint8_t, _raster::UserTexture>();
+  lights = std::map<uint8_t, _raster::Light>();
 
   int depth_buffer_size = width * height;
 
@@ -111,6 +112,45 @@ glm::vec4 _raster::Rasterizer::gen_frag_color_from_texture(const glm::vec4 &frag
 }
 
 
+glm::vec4 _raster::Rasterizer::shade_fragment(const glm::vec4 &frag_coord, const glm::vec4 &a_world, const glm::vec4 &b_world,
+                                              const glm::vec4 &c_world, const glm::vec4 &a_normal, const glm::vec4 &b_normal,
+                                              const glm::vec4 &c_normal, const glm::vec4 &frag_color) {
+  glm::vec4 result = frag_color;
+  result /= 255.0f;
+
+  glm::vec4 frag_normal = a_normal * frag_coord.x + b_normal * frag_coord.y + c_normal * frag_coord.z;
+  glm::vec4 frag_world = a_world * frag_coord.x + b_world * frag_coord.y + c_world * frag_coord.z;
+
+  frag_normal *= frag_coord.w;
+
+  glm::vec4 normal = glm::normalize(frag_normal);
+  glm::vec4 view_direction = glm::normalize(view_position - frag_world);
+  glm::vec4 diffuse = glm::vec4(1.0f);
+  glm::vec4 specular = glm::vec4(1.0f);
+
+  for (auto light : lights) {
+    glm::vec4 light_direction = glm::normalize(glm::vec4(light.second.position, 0.0f) - frag_world);
+    glm::vec4 reflect_direction = glm::reflect(-light_direction, normal);
+
+    float diff = glm::max(glm::dot(frag_normal, light_direction), 0.0f);
+    diffuse = diffuse * glm::vec4(light.second.color * diff, 1.0f);
+
+    float spec = pow(glm::max(glm::dot(view_direction, reflect_direction), 0.0f), 32.0f);
+    specular = specular * specular_strength * spec * glm::vec4(light.second.color, 1.0f);
+  }
+
+  glm::vec4 ambient = result * ambient_strength;
+  result = (ambient + diffuse + specular) * result;
+
+  result.x = glm::max(0, glm::min(255, (int)glm::floor(result.x * 256.0f)));
+  result.y = glm::max(0, glm::min(255, (int)glm::floor(result.y * 256.0f)));
+  result.z = glm::max(0, glm::min(255, (int)glm::floor(result.z * 256.0f)));
+  result.w = 255.0f;
+
+  return result;
+}
+
+
 glm::vec4 _raster::Rasterizer::gen_frag_color_from_attributes(const glm::vec4 &frag_coord, const _vertex::Vertex &a,
                                                               const _vertex::Vertex &b, const _vertex::Vertex &c) {
   glm::vec4 result = glm::vec4(1.0f);
@@ -127,6 +167,10 @@ glm::vec4 _raster::Rasterizer::gen_frag_color_from_attributes(const glm::vec4 &f
       case TEXTURE_COORD_ATTRIBUTE:
         result *= gen_frag_color_from_texture(frag_coord, a.attribs[i].data,
                                               b.attribs[i].data, c.attribs[i].data); 
+        break;
+      case NORM_VECTOR_ATTRIBUTE:
+        result = shade_fragment(frag_coord, a.world_coords, b.world_coords, c.world_coords,
+                                a.attribs[i].data, b.attribs[i].data, c.attribs[i].data, result);
         break;
     }
   }
