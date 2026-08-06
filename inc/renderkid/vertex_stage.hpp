@@ -12,6 +12,7 @@
 #include <utility>
 #include <iostream>
 #include <tuple>
+#include <map>
 
 #define MAX_ATTRIBS 16
 
@@ -86,8 +87,14 @@ struct Vertex {
   std::array<VertexAttrib, MAX_ATTRIBS> attribs;
 };
 
+struct VertexBuffer {
+  std::vector<VertexAttribData> vertex_attribs;
+  std::vector<Vertex> vertices;
+  size_t vertex_size;
+};
 
-extern std::vector<Vertex> vertex_data;
+
+extern std::map<uint8_t, VertexBuffer> vertex_buffers;
 
 
 struct Primitive {

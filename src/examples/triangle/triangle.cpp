@@ -21,12 +21,15 @@ int main() {
   render::set_view_matrix(view_matrix);
   render::set_ortho_projection(-1.0f, 1.0f, -1.0f, 1.0f);
 
+  uint8_t vertex_buffer = render::create_vertex_buffer();
+  render::use_vertex_buffer(vertex_buffer);
+
   render::add_vertex_attribute(VERTEX_ATTRIBUTE, 0);
   render::add_vertex_attribute(COLOR_RGBA_ATTRIBUTE, 3);
-  render::read_vertex_data(vertices, sizeof(vertices) / sizeof(float));
+  render::load_data_into_vertex_buffer(vertices, sizeof(vertices) / sizeof(float));
   render::set_viewport(0, 0, 800, 600);
 
   while (true) {
-    render::draw_unindexed(TRIANGLES);
+    render::draw(TRIANGLES);
   }
 }

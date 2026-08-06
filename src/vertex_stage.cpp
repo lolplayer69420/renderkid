@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <iostream>
 
-std::vector<_vertex::Vertex> _vertex::vertex_data;
+std::map<uint8_t, _vertex::VertexBuffer> _vertex::vertex_buffers;
 
 
 void _vertex::VertexStage::process_vertex_data(uint8_t primitive_type,

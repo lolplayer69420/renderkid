@@ -43,15 +43,18 @@ int main() {
   render::use_texture(texture);
   render::load_data_to_texture(data);
 
+  uint8_t vertex_buffer = render::create_vertex_buffer();
+  render::use_vertex_buffer(vertex_buffer);
+
   render::set_model_matrix(model_matrix);
   render::set_view_matrix(view_matrix);
   render::set_perspective_projection(glm::radians(45.0f), 800.0f / 600.0f, 0.5f, 100.0f);
 
   render::add_vertex_attribute(VERTEX_ATTRIBUTE, 0);
   render::add_vertex_attribute(TEXTURE_COORD_ATTRIBUTE, 3);
-  render::read_vertex_data(vertices, sizeof(vertices) / sizeof(float));
+  render::load_data_into_vertex_buffer(vertices, sizeof(vertices) / sizeof(float));
 
   while (true) {
-    render::draw_unindexed(TRIANGLES);
+    render::draw(TRIANGLES);
   }
 }

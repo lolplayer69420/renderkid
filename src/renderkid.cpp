@@ -14,10 +14,9 @@
 
 std::optional<_vertex::VertexStage> vertex_stage;
 std::optional<_raster::Rasterizer> rasterizer;
+_vertex::VertexBuffer *current_vertex_buffer;
 
-std::vector<_vertex::VertexAttribData> vertex_attribs;
-
-size_t vertex_size = 0;
+uint8_t next_vertex_buffer_id = 0;
 
 
 void render::add_vertex_attribute(uint8_t type, size_t position) {
@@ -28,23 +27,23 @@ void render::add_vertex_attribute(uint8_t type, size_t position) {
 
   switch (type) {
     case VERTEX_ATTRIBUTE:
-      vertex_size += 3;
+      current_vertex_buffer->vertex_size += 3;
       break;
     case COLOR_RGBA_ATTRIBUTE:
-      vertex_size += 4;
+      current_vertex_buffer->vertex_size += 4;
       break;
     case COLOR_RGB_ATTRIBUTE:
-      vertex_size += 3;
+      current_vertex_buffer->vertex_size += 3;
       break;
     case TEXTURE_COORD_ATTRIBUTE:
-      vertex_size += 2;
+      current_vertex_buffer->vertex_size += 2;
       break;
     case NORM_VECTOR_ATTRIBUTE:
-      vertex_size += 3;
+      current_vertex_buffer->vertex_size += 3;
       break;
   }
 
-  vertex_attribs.push_back(attrib_data);
+  current_vertex_buffer->vertex_attribs.push_back(attrib_data);
 }
 
 
@@ -76,15 +75,31 @@ void render::set_perspective_projection(float fovy, float aspect, float near, fl
 } 
 
 
+uint8_t render::create_vertex_buffer() {
+  _vertex::vertex_buffers[next_vertex_buffer_id] = _vertex::VertexBuffer();
+  return next_vertex_buffer_id++;
+}
 
-void render::read_vertex_data(float *data, size_t size) {
-  if (vertex_attribs.empty()) {
+
+void render::destroy_vertex_buffer(uint8_t id) {
+  _vertex::vertex_buffers.erase(id);
+}
+
+
+void render::use_vertex_buffer(uint8_t id) {
+  current_vertex_buffer = &_vertex::vertex_buffers[id];
+}
+
+
+void render::load_data_into_vertex_buffer(float *data, size_t size) {
+  if (current_vertex_buffer->vertex_attribs.empty()) {
     throw std::runtime_error("No vertex attributes were set!");
   }
 
-  for (size_t i = 0; i < size; i += vertex_size) {
-    _vertex::Vertex new_vertex = _vertex::Vertex(&data[i], vertex_attribs);
-    _vertex::vertex_data.push_back(new_vertex);
+
+  for (size_t i = 0; i < size; i += current_vertex_buffer->vertex_size) {
+    _vertex::Vertex new_vertex = _vertex::Vertex(&data[i], current_vertex_buffer->vertex_attribs);
+    current_vertex_buffer->vertices.push_back(new_vertex);
   }
 }
 
@@ -146,6 +161,7 @@ void render::set_view_position(const glm::vec3 &position) {
 
 void render::init_window(int width, int height) {
   InitWindow(width, height, "Renderkid");
+  _vertex::vertex_buffers = std::map<uint8_t, _vertex::VertexBuffer>();
 }
 
 
@@ -155,7 +171,7 @@ void render::set_viewport(int x, int y, int width, int height) {
 }
 
 
-void render::draw_unindexed(uint8_t primitive_type) {
-  vertex_stage->process_vertex_data(primitive_type, _vertex::vertex_data);
+void render::draw(uint8_t primitive_type) {
+  vertex_stage->process_vertex_data(primitive_type, current_vertex_buffer->vertices);
   rasterizer->draw_primitives(primitive_type, vertex_stage->get_primitives());
 }

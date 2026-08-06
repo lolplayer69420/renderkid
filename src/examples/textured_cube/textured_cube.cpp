@@ -73,16 +73,19 @@ int main() {
   render::use_texture(texture);
   render::load_data_to_texture(texture_data);
 
+  uint8_t texture_buffer = render::create_vertex_buffer();
+  render::use_vertex_buffer(texture_buffer);
+
   render::set_model_matrix(model);
   render::set_view_matrix(view);
   render::add_vertex_attribute(VERTEX_ATTRIBUTE, 0);
   render::add_vertex_attribute(TEXTURE_COORD_ATTRIBUTE, 3);
-  render::read_vertex_data(vertices, sizeof(vertices) / sizeof(float));
+  render::load_data_into_vertex_buffer(vertices, sizeof(vertices) / sizeof(float));
 
   while (true) {
     model = glm::rotate(model, SPEED, glm::vec3(0.5f, 1.0f, 0.0f));
     render::set_model_matrix(model);
-    render::draw_unindexed(TRIANGLES);
+    render::draw(TRIANGLES);
   }
 }
 
