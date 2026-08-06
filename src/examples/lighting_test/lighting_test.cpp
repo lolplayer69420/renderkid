@@ -1,5 +1,3 @@
-// TODO: Terminar de implementar la iluminacion
-
 #include <renderkid.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -68,13 +66,16 @@ int main() {
   uint8_t light = render::create_light(glm::vec3(light_position.x, light_position.y, light_position.z),
                                        glm::vec3(1.0f));
 
+  uint8_t vertex_buffer = render::create_vertex_buffer();
+  render::use_vertex_buffer(vertex_buffer);
+
   render::set_model_matrix(model);
   render::set_view_matrix(view);
   render::add_vertex_attribute(VERTEX_ATTRIBUTE, 0);
   render::add_vertex_attribute(COLOR_RGB_ATTRIBUTE, 3);
   render::add_vertex_attribute(NORM_VECTOR_ATTRIBUTE, 6);
 
-  render::read_vertex_data(vertices, sizeof(vertices) / sizeof(float));
+  render::load_data_into_vertex_buffer(vertices, sizeof(vertices) / sizeof(float));
 
   while (true) {
     glm::mat4 light_rotation = glm::rotate(glm::mat4(1.0f), SPEED, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -82,7 +83,7 @@ int main() {
     render::set_light_position(light, glm::vec3(light_position.x, light_position.y, light_position.z));
 
     render::set_model_matrix(model);
-    render::draw_unindexed(TRIANGLES);
+    render::draw(TRIANGLES);
   }
 }
 
