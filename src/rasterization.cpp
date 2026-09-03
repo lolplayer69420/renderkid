@@ -114,7 +114,7 @@ glm::vec4 _raster::Rasterizer::gen_frag_color_from_texture(const glm::vec4 &frag
 
 glm::vec4 _raster::Rasterizer::shade_fragment(const glm::vec4 &frag_coord, const glm::vec4 &a_world, const glm::vec4 &b_world,
                                               const glm::vec4 &c_world, const glm::vec4 &a_normal, const glm::vec4 &b_normal,
-                                              const glm::vec4 &c_normal, const glm::vec4 &frag_color) {
+                                              const glm::vec4 &c_normal, const glm::vec4 &frag_color, float brightness) {
   glm::vec4 result = frag_color;
   result /= 255.0f;
 
@@ -135,7 +135,7 @@ glm::vec4 _raster::Rasterizer::shade_fragment(const glm::vec4 &frag_coord, const
     float diff = glm::max(glm::dot(frag_normal, light_direction), 0.0f);
     diffuse = diffuse * glm::vec4(light.second.color * diff, 1.0f);
 
-    float spec = pow(glm::max(glm::dot(view_direction, reflect_direction), 0.0f), 32.0f);
+    float spec = pow(glm::max(glm::dot(view_direction, reflect_direction), 0.0f), brightness);
     specular = specular * specular_strength * spec * glm::vec4(light.second.color, 1.0f);
   }
 
@@ -152,7 +152,8 @@ glm::vec4 _raster::Rasterizer::shade_fragment(const glm::vec4 &frag_coord, const
 
 
 glm::vec4 _raster::Rasterizer::gen_frag_color_from_attributes(const glm::vec4 &frag_coord, const _vertex::Vertex &a,
-                                                              const _vertex::Vertex &b, const _vertex::Vertex &c) {
+                                                              const _vertex::Vertex &b, const _vertex::Vertex &c,
+                                                              float brightness) {
   glm::vec4 result = glm::vec4(1.0f);
 
   for (size_t i = 0; i < MAX_ATTRIBS; ++i) {
@@ -166,11 +167,11 @@ glm::vec4 _raster::Rasterizer::gen_frag_color_from_attributes(const glm::vec4 &f
         break;
       case TEXTURE_COORD_ATTRIBUTE:
         result *= gen_frag_color_from_texture(frag_coord, a.attribs[i].data,
-                                              b.attribs[i].data, c.attribs[i].data); 
+                                              b.attribs[i].data, c.attribs[i].data);
         break;
       case NORM_VECTOR_ATTRIBUTE:
         result = shade_fragment(frag_coord, a.world_coords, b.world_coords, c.world_coords,
-                                a.attribs[i].data, b.attribs[i].data, c.attribs[i].data, result);
+                                a.attribs[i].data, b.attribs[i].data, c.attribs[i].data, result, brightness);
         break;
     }
   }
@@ -179,7 +180,7 @@ glm::vec4 _raster::Rasterizer::gen_frag_color_from_attributes(const glm::vec4 &f
 }
 
 
-void _raster::Rasterizer::raster_triangle(const _vertex::Primitive &triangle) {
+void _raster::Rasterizer::raster_triangle(const _vertex::Primitive &triangle, float brightness) {
   _vertex::Vertex v0 = triangle.vertices[0];
   _vertex::Vertex v2 = triangle.vertices[1];
   _vertex::Vertex v1 = triangle.vertices[2];
@@ -231,7 +232,7 @@ void _raster::Rasterizer::raster_triangle(const _vertex::Primitive &triangle) {
         bary_coords.w = frag_z;
         glm::vec4 frag_color;
 
-        frag_color = gen_frag_color_from_attributes(bary_coords, v0, v1, v2);
+        frag_color = gen_frag_color_from_attributes(bary_coords, v0, v1, v2, brightness);
 
         int buffer_index = ((int)y) * width + ((int)x);
         float previous_z = depth_buffer[buffer_index];
@@ -263,7 +264,8 @@ void _raster::Rasterizer::clear_framebuffer() {
 }
 
 
-void _raster::Rasterizer::draw_primitives(uint8_t primitive_type, std::vector<_vertex::Primitive> &primitives) {
+void _raster::Rasterizer::draw_primitives(uint8_t primitive_type, std::vector<_vertex::Primitive> &primitives,
+                                          float brightness) {
   BeginDrawing();
   clear_framebuffer();
   int depth_buffer_size = width * height;
@@ -273,7 +275,7 @@ void _raster::Rasterizer::draw_primitives(uint8_t primitive_type, std::vector<_v
   }
 
   for (const _vertex::Primitive &primitive : primitives) {
-    raster_triangle(primitive);
+    raster_triangle(primitive, brightness);
   }
 
   primitives.clear();

@@ -26,7 +26,7 @@ struct Light {
 class Rasterizer {
   public:
     Rasterizer(int width, int height);
-    void draw_primitives(uint8_t primitive_type, std::vector<_vertex::Primitive> &primitives);
+    void draw_primitives(uint8_t primitive_type, std::vector<_vertex::Primitive> &primitives, float brightness);
     uint8_t create_texture(int width, int height, int n_channels);
 
     void use_texture(uint8_t id) {
@@ -71,13 +71,14 @@ class Rasterizer {
     }
 
  private:
-    void raster_triangle(const _vertex::Primitive &triangle);
+    void raster_triangle(const _vertex::Primitive &triangle, float brightness);
     glm::vec4 gen_frag_color_from_attributes(const glm::vec4 &frag_coord, const _vertex::Vertex &a, const _vertex::Vertex &b,
-                                             const _vertex::Vertex &c);
+                                             const _vertex::Vertex &c, float brightness);
     glm::vec4 gen_frag_color_from_texture(const glm::vec4 &frag_coord, const glm::vec4 &a_coord,
                                           const glm::vec4 &b_coord, const glm::vec4 &c_coord);
     glm::vec4 shade_fragment(const glm::vec4 &frag_coord, const glm::vec4 &a_world, const glm::vec4 &b_world, const glm::vec4 &c_world,
-                             const glm::vec4 &a_normal, const glm::vec4 &b_normal, const glm::vec4 &c_normal, const glm::vec4 &frag_color);
+                             const glm::vec4 &a_normal, const glm::vec4 &b_normal, const glm::vec4 &c_normal, const glm::vec4 &frag_color,
+                             float brightness);
     void draw_framebuffer();
     void clear_framebuffer();
     float *depth_buffer;

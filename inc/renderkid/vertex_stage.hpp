@@ -87,10 +87,12 @@ struct Vertex {
   std::array<VertexAttrib, MAX_ATTRIBS> attribs;
 };
 
+
 struct VertexBuffer {
   std::vector<VertexAttribData> vertex_attribs;
   std::vector<Vertex> vertices;
   size_t vertex_size;
+  float brightness;
 };
 
 
@@ -144,6 +146,7 @@ class VertexStage {
       float inv_w = 1 / vertex.coords.w;
 
       vertex.coords /= vertex.coords.w;
+
       vertex.coords.w = inv_w;
       vertex.coords.x = ((width / 2) * vertex.coords.x) + ((width - 1) / 2);
       vertex.coords.y = (1.0f - (vertex.coords.y * 0.5f + 0.5f)) * height;

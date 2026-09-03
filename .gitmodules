@@ -7,3 +7,6 @@
 [submodule "src/examples/texture_test/stb"]
 	path = inc/stb
 	url = https://github.com/nothings/stb.git
+[submodule "src/examples/teapot/tinyobjloader"]
+	path = src/examples/teapot/tinyobjloader
+	url = https://github.com/tinyobjloader/tinyobjloader
