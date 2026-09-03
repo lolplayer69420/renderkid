@@ -21,6 +21,7 @@ void set_view_matrix(const glm::mat4 &matrix);
 void set_ortho_projection(float left, float right, float bottom, float top, float near, float far);
 void set_ortho_projection(float left, float right, float top, float bottom);
 void set_perspective_projection(float fovy, float aspect, float near, float far);
+void set_perspective_projection(float fov, float width, float height, float near, float far);
 void init_window(int width, int height);
 
 uint8_t create_vertex_buffer();
@@ -28,6 +29,7 @@ void destroy_vertex_buffer(uint8_t id);
 void use_vertex_buffer(uint8_t id);
 void add_vertex_attribute(uint8_t type, size_t position);
 void load_data_into_vertex_buffer(float *data, size_t size);
+void set_vertex_buffer_brightness(float brightness);
 
 uint8_t create_texture(int width, int height, int n_channels);
 void load_data_to_texture(uint8_t *data);

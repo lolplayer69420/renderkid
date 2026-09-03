@@ -72,11 +72,18 @@ void render::set_ortho_projection(float left, float right, float top, float bott
 void render::set_perspective_projection(float fovy, float aspect, float near, float far) {
   glm::mat4 matrix = glm::perspective(fovy, aspect, near, far);
   vertex_stage->set_proj_matrix(matrix);
-} 
+}
+
+
+void render::set_perspective_projection(float fov, float width, float height, float near, float far) {
+  glm::mat4 matrix = glm::perspectiveFov(fov, width, height, near, far);
+  vertex_stage->set_proj_matrix(matrix);
+}
 
 
 uint8_t render::create_vertex_buffer() {
   _vertex::vertex_buffers[next_vertex_buffer_id] = _vertex::VertexBuffer();
+  _vertex::vertex_buffers[next_vertex_buffer_id].brightness = 2.0f;
   return next_vertex_buffer_id++;
 }
 
@@ -101,6 +108,11 @@ void render::load_data_into_vertex_buffer(float *data, size_t size) {
     _vertex::Vertex new_vertex = _vertex::Vertex(&data[i], current_vertex_buffer->vertex_attribs);
     current_vertex_buffer->vertices.push_back(new_vertex);
   }
+}
+
+
+void render::set_vertex_buffer_brightness(float brightness) {
+  current_vertex_buffer->brightness = brightness;
 }
 
 
@@ -173,5 +185,6 @@ void render::set_viewport(int x, int y, int width, int height) {
 
 void render::draw(uint8_t primitive_type) {
   vertex_stage->process_vertex_data(primitive_type, current_vertex_buffer->vertices);
-  rasterizer->draw_primitives(primitive_type, vertex_stage->get_primitives());
+  rasterizer->draw_primitives(primitive_type, vertex_stage->get_primitives(),
+                              current_vertex_buffer->brightness);
 }
